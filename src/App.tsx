@@ -11,6 +11,7 @@ import { getTodos } from './api';
 import { Todo } from './types/Todo';
 
 export const App: React.FC = () => {
+  const [error, setError] = useState<string | null>(null);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [actualFilters, setActualFilters] = useState<string>('all');
@@ -22,8 +23,8 @@ export const App: React.FC = () => {
 
     getTodos()
       .then(setTodos)
-      .catch(error => {
-        throw new Error(error);
+      .catch(() => {
+        setError('Failed to load user');
       })
       .finally(() => {
         setIsLoading(false);
@@ -64,7 +65,11 @@ export const App: React.FC = () => {
 
             <div className="block">
               {isLoading ? (
-                <Loader />
+                error ? (
+                  'Failed to load user'
+                ) : (
+                  <Loader />
+                )
               ) : (
                 <TodoList
                   todos={visibleTodos}
