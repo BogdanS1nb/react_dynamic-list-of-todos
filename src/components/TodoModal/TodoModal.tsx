@@ -4,38 +4,31 @@ import { getUser } from '../../api';
 import { User } from '../../types/User';
 import { Todo } from '../../types/Todo';
 
-interface MyComponentProps {
+interface Props {
   todo: Todo;
   setTodoModal: React.Dispatch<React.SetStateAction<Todo | null>>;
 }
 
-export const TodoModal: React.FC<MyComponentProps> = ({
-  todo,
-  setTodoModal,
-}) => {
+export const TodoModal: React.FC<Props> = ({ todo, setTodoModal }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const data: User = await getUser(todo.userId);
+    setIsLoading(true);
 
-        if (data) {
-          setUser(data);
-        }
-      } catch (error) {
-        throw new Error();
-      }
-    };
-
-    loadUser();
+    getUser(todo.userId)
+      .then(setUser)
+      .catch(error => {
+        throw new Error(error);
+      })
+      .finally(() => setIsLoading(false));
   }, [todo]);
 
   return (
     <div className="modal is-active" data-cy="modal">
-      <div className="modal-background" />
+      <div className="modal-background" onClick={() => setTodoModal(null)} />
 
-      {!user ? (
+      {isLoading || !user ? (
         <Loader />
       ) : (
         <div className="modal-card">
@@ -44,10 +37,8 @@ export const TodoModal: React.FC<MyComponentProps> = ({
               className="modal-card-title has-text-weight-medium"
               data-cy="modal-header"
             >
-              Todo {`#${todo.id}`}
+              Todo #{todo.id}
             </div>
-
-            {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <button
               type="button"
               className="delete"
@@ -67,9 +58,7 @@ export const TodoModal: React.FC<MyComponentProps> = ({
               ) : (
                 <strong className="has-text-danger">Planned</strong>
               )}
-
               {' by '}
-
               <a href={`mailto:${user.email}`}>{user.name}</a>
             </p>
           </div>

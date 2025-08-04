@@ -12,37 +12,40 @@ import { Todo } from './types/Todo';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [actualFilters, setActualFilters] = useState<string>('All');
-  const [filterQuery, setFilterQuery] = useState<string>(''); // filterQury
-  const [todoModal, setTodoModal] = useState<Todo | null>(null); // todoModalId
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [actualFilters, setActualFilters] = useState<string>('all');
+  const [filterQuery, setFilterQuery] = useState<string>('');
+  const [todoModal, setTodoModal] = useState<Todo | null>(null);
 
   useEffect(() => {
+    setIsLoading(true);
+
     getTodos()
       .then(setTodos)
       .catch(error => {
-        // eslint-disable-next-line no-console
-        console.log('Помилки під час отримання завдань:', error);
-
-        throw new Error();
+        throw new Error(error);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-
-    // loadTodos();
   }, []);
 
-  const getFilteredTodos = (array: Todo[], filter: string) => {
-    switch (filter) {
-      case 'All':
-        return array;
-      case 'Active':
-        return array.filter(todo => !todo.completed);
-      case 'Completed':
-        return array.filter(todo => todo.completed);
-      default:
-        return array;
-    }
+  const getVisibleTodos = (array: Todo[], filter: string, query: string) => {
+    return array.filter(todo => {
+      const matchesStatus =
+        filter === 'all' ||
+        (filter === 'active' && !todo.completed) ||
+        (filter === 'completed' && todo.completed);
+
+      const matchesQuery = todo.title
+        .toLowerCase()
+        .includes(query.toLowerCase());
+
+      return matchesStatus && matchesQuery;
+    });
   };
 
-  const filteredTodos = getFilteredTodos(todos, actualFilters);
+  const visibleTodos = getVisibleTodos(todos, actualFilters, filterQuery);
 
   return (
     <>
@@ -60,16 +63,20 @@ export const App: React.FC = () => {
             </div>
 
             <div className="block">
-              {todos.length === 0 && <Loader />}
-              <TodoList
-                todos={filteredTodos}
-                filterQuery={filterQuery}
-                setTodoModal={setTodoModal}
-              />
+              {isLoading ? (
+                <Loader />
+              ) : (
+                <TodoList
+                  todos={visibleTodos}
+                  setTodoModal={setTodoModal}
+                  selectedTodo={todoModal}
+                />
+              )}
             </div>
           </div>
         </div>
       </div>
+
       {!!todoModal && (
         <TodoModal todo={todoModal} setTodoModal={setTodoModal} />
       )}

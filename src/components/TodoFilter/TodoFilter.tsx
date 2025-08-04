@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 
-interface MyComponentProps {
+interface Props {
   actualFilters: string;
   setActualFilters: React.Dispatch<React.SetStateAction<string>>;
   setFilterQuery: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export const TodoFilter: React.FC<MyComponentProps> = ({
+export const TodoFilter: React.FC<Props> = ({
   actualFilters,
   setActualFilters,
   setFilterQuery,
@@ -14,17 +14,13 @@ export const TodoFilter: React.FC<MyComponentProps> = ({
   const [searchParam, setSearchParam] = useState<string>('');
 
   useEffect(() => {
-    const seekParam = searchParam.trim() === '' ? searchParam : searchParam;
-
-    setFilterQuery(seekParam.toLowerCase());
+    setFilterQuery(searchParam.trim().toLowerCase());
   }, [searchParam, setFilterQuery]);
 
   return (
     <form
       className="field has-addons"
-      onSubmit={event => {
-        event.preventDefault();
-      }}
+      onSubmit={event => event.preventDefault()}
     >
       <p className="control">
         <span className="select">
@@ -35,9 +31,9 @@ export const TodoFilter: React.FC<MyComponentProps> = ({
               setActualFilters(event.target.value);
             }}
           >
-            <option value="All">All</option>
-            <option value="Active">Active</option>
-            <option value="Completed">Completed</option>
+            <option value="all">All</option>
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
           </select>
         </span>
       </p>
@@ -48,18 +44,15 @@ export const TodoFilter: React.FC<MyComponentProps> = ({
           type="text"
           className="input"
           value={searchParam}
-          onChange={event => {
-            setSearchParam(event.target.value);
-          }}
+          onChange={event => setSearchParam(event.target.value)}
           placeholder="Search..."
         />
         <span className="icon is-left">
           <i className="fas fa-magnifying-glass" />
         </span>
 
-        <span className="icon is-right" style={{ pointerEvents: 'all' }}>
-          {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-          {searchParam && (
+        {searchParam && (
+          <span className="icon is-right" style={{ pointerEvents: 'all' }}>
             <button
               data-cy="clearSearchButton"
               type="button"
@@ -69,8 +62,8 @@ export const TodoFilter: React.FC<MyComponentProps> = ({
                 setFilterQuery('');
               }}
             />
-          )}
-        </span>
+          </span>
+        )}
       </p>
     </form>
   );

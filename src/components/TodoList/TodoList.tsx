@@ -1,24 +1,17 @@
 import React from 'react';
 import { Todo } from '../../types/Todo';
-interface MyComponentProps {
+
+interface Props {
   todos: Todo[];
-  filterQuery: string;
   setTodoModal: React.Dispatch<React.SetStateAction<Todo | null>>;
+  selectedTodo: Todo | null;
 }
 
-export const TodoList: React.FC<MyComponentProps> = ({
+export const TodoList: React.FC<Props> = ({
   todos,
-  filterQuery,
   setTodoModal,
+  selectedTodo,
 }) => {
-  const seekTodos = todos.filter(todo => {
-    if (todo.title.includes(filterQuery.toLocaleLowerCase())) {
-      return true;
-    } else {
-      return false;
-    }
-  });
-
   return (
     <table className="table is-narrow is-fullwidth">
       <thead>
@@ -35,43 +28,50 @@ export const TodoList: React.FC<MyComponentProps> = ({
       </thead>
 
       <tbody>
-        {seekTodos.map(todo => {
-          return (
-            <tr data-cy="todo" className="" key={todo.id}>
-              <td className="is-vcentered">{todo.id}</td>
-              <td className="is-vcentered">
-                {todo.completed && (
-                  <span className="icon" data-cy="iconCompleted">
-                    <i className="fas fa-check" />
-                  </span>
-                )}
-              </td>
+        {todos.map(todo => (
+          <tr
+            key={todo.id}
+            data-cy="todo"
+            className={todo.completed ? 'has-background-info-light' : ''}
+          >
+            <td className="is-vcentered">{todo.id}</td>
+            <td className="is-vcentered">
+              {todo.completed && (
+                <span className="icon" data-cy="iconCompleted">
+                  <i className="fas fa-check" />
+                </span>
+              )}
+            </td>
 
-              <td className="is-vcentered is-expanded">
-                <p
-                  className={
-                    todo.completed ? 'has-text-success' : 'has-text-danger'
-                  }
-                >
-                  {todo.title}
-                </p>
-              </td>
+            <td className="is-vcentered is-expanded">
+              <p
+                className={
+                  todo.completed ? 'has-text-success' : 'has-text-danger'
+                }
+              >
+                {todo.title}
+              </p>
+            </td>
 
-              <td className="has-text-right is-vcentered">
-                <button
-                  data-cy="selectButton"
-                  className="button"
-                  type="button"
-                  onClick={() => setTodoModal(todo)}
-                >
-                  <span className="icon">
-                    <i className="far fa-eye" />
-                  </span>
-                </button>
-              </td>
-            </tr>
-          );
-        })}
+            <td className="has-text-right is-vcentered">
+              <button
+                data-cy="selectButton"
+                className="button"
+                type="button"
+                onClick={() => setTodoModal(todo)}
+              >
+                <span className="icon">
+                  <i
+                    className={
+                      'far ' +
+                      (selectedTodo?.id === todo.id ? 'fa-eye-slash' : 'fa-eye')
+                    }
+                  />
+                </span>
+              </button>
+            </td>
+          </tr>
+        ))}
       </tbody>
     </table>
   );
